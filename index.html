@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💸 Генератор денежной фотки 💸</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            margin-bottom: 10px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        p {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+        #canvasContainer {
+            position: relative;
+            width: 100%;
+            max-width: 1599px;
+            margin: 0 auto;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+        }
+        #dropZone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.7);
+            overflow: hidden;
+        }
+        .dollar-border {
+            position: absolute;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .dollar-border span {
+            font-size: 2rem;
+            line-height: 2rem;
+            flex: 1;
+            text-align: center;
+        }
+        .upload-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+        #uploadBtn, #downloadBtn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            opacity: 1;
+            transition: background-color 0.2s ease;
+            height: 50px; /* Фиксированная высота кнопки */
+            display: inline-block;
+        }
+        #uploadBtn:hover, #downloadBtn:hover {
+            background-color: #338731;
+        }
+        #dropText {
+            font-size: 12px; /* Фиксированный размер текста */
+            color: #333;
+            width: 152px; /* Фиксированная ширина текста */
+            background-color: #FFFEED;
+            padding: 8px; /* Фиксированные паддинги */
+            border-radius: 5px;
+            margin-top: 8px; /* Фиксированный отступ между кнопкой и текстом */
+        }
+        #downloadBtn {
+            display: none;
+            margin: 0; /* Удалить отступы */
+        }
+        #privacyNote {
+            font-size: 16px;
+            color: #777;
+            margin-top: 20px;
+        }
+        .dollar-border-top, .dollar-border-bottom, .dollar-border-left, .dollar-border-right {
+            position: absolute;
+            display: flex;
+        }
+        .dollar-border-top {
+            top: 0;
+            left: 0;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .dollar-border-bottom {
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .dollar-border-left {
+            top: 0;
+            left: 0;
+            height: 100%;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .dollar-border-right {
+            top: 0;
+            right: 0;
+            height: 100%;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <h1>💸&nbsp;Генератор денежной фотки&nbsp;💸</h1>
+    <p>По проверенным источникам, такое фото приманивает деньги. Загрузите свое фото и скачайте результат. Далее ожидайте скорейшего финансового успеха.</p>
+    <div id="canvasContainer">
+        <canvas id="canvas" width="1599" height="670"></canvas>
+        <div id="dropZone">
+            <div class="dollar-border-top">
+                <span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span>
+            </div>
+            <div class="dollar-border-bottom">
+                <span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span>
+            </div>
+            <div class="dollar-border-left">
+                <span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span>
+            </div>
+            <div class="dollar-border-right">
+                <span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span><span>💸</span>
+            </div>
+        </div>
+        <div class="upload-container">
+            <button id="uploadBtn">Загрузить фотку</button>
+            <p id="dropText">или просто перетащите ее&nbsp;на&nbsp;эту страницу</p>
+        </div>
+    </div>
+    <p id="privacyNote">Ваша фотка никуда не отправляется, все работает локально в&nbsp;браузере</p>
+    <button id="downloadBtn">Скачать фотку</button>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const dropZone = document.getElementById('dropZone');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const dropText = document.getElementById('dropText');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const privacyNote = document.getElementById('privacyNote');
+
+        // Load dollar bill image
+        const dollarImg = new Image();
+        dollarImg.crossOrigin = 'anonymous';
+        dollarImg.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Usdollar100front.jpg/1599px-Usdollar100front.jpg';
+        dollarImg.onload = () => {
+            ctx.drawImage(dollarImg, 0, 0, canvas.width, canvas.height);
+        };
+
+        // Handle file input
+        const handleFile = (file) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const avatarImg = new Image();
+                avatarImg.onload = () => {
+                    generateImage(avatarImg);
+                };
+                avatarImg.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Generate image with avatar
+        const generateImage = (avatarImg) => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(dollarImg, 0, 0, canvas.width, canvas.height);
+
+            const avatarWidth = 485; // Width of the avatar oval
+            const avatarHeight = 567; // Height of the avatar oval
+            const x = canvas.width / 2 - avatarWidth / 2 - 90; // Center horizontally and shift right by 40 pixels
+            const y = canvas.height / 2 - avatarHeight / 2; // Center vertically
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.ellipse(x + avatarWidth / 2, y + avatarHeight / 2, avatarWidth / 2, avatarHeight / 2, 0, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            // Calculate the scale factor to fill the oval
+            const scale = Math.max(avatarWidth / avatarImg.width, avatarHeight / avatarImg.height);
+            const scaledWidth = avatarImg.width * scale;
+            const scaledHeight = avatarImg.height * scale;
+
+            // Calculate the position to center the image within the oval
+            const offsetX = (avatarWidth - scaledWidth) / 2;
+            const offsetY = (avatarHeight - scaledHeight) / 2;
+
+            ctx.drawImage(avatarImg, x + offsetX, y + offsetY, scaledWidth, scaledHeight);
+            ctx.restore();
+
+            // Show the download button
+            downloadBtn.style.display = 'inline-block';
+
+            // Hide the upload button and drop text
+            uploadBtn.style.display = 'none';
+            dropText.style.display = 'none';
+
+            // Change the privacy note text
+            privacyNote.textContent = 'Ай красота! Я уже чувствую запах денег';
+        };
+
+        // Handle file input from button
+        uploadBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (event) => {
+                handleFile(event.target.files[0]);
+            };
+            input.click();
+        });
+
+        // Handle file drag and drop
+        let isDragging = false;
+
+        document.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            if (!isDragging) {
+                dropZone.style.display = 'flex';
+                uploadBtn.style.display = 'none';
+                dropText.style.display = 'none';
+                isDragging = true;
+            }
+        });
+
+        document.addEventListener('dragleave', (event) => {
+            if (isDragging && event.target === document) {
+                dropZone.style.display = 'none';
+                uploadBtn.style.display = 'inline-block';
+                dropText.style.display = 'block';
+                isDragging = false;
+            }
+        });
+
+        document.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.style.display = 'none';
+            uploadBtn.style.display = 'inline-block';
+            dropText.style.display = 'block';
+            const file = event.dataTransfer.files[0];
+            handleFile(file);
+            isDragging = false;
+        });
+
+        document.addEventListener('dragend', () => {
+            if (isDragging) {
+                dropZone.style.display = 'none';
+                uploadBtn.style.display = 'inline-block';
+                dropText.style.display = 'block';
+                isDragging = false;
+            }
+        });
+
+        dropZone.addEventListener('dragleave', (event) => {
+            if (event.target === dropZone) {
+                dropZone.style.display = 'none';
+                uploadBtn.style.display = 'inline-block';
+                dropText.style.display = 'block';
+                isDragging = false;
+            }
+        });
+
+        // Handle download button click
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'dollar_bill_with_avatar.jpeg';
+            link.href = canvas.toDataURL('image/jpeg');
+            link.click();
+        });
+    </script>
+</body>
+</html>
