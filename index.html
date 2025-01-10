@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,9 +7,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
-    
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+        @font-face {
+            font-family: 'Comic Neue', serif;
+            font-style: normal;
+            font-weight: 700;
+            src: url('https://fonts.gstatic.com/s/comicneue/v8/4UaErEJDsxBrF37olUeD_xHM8pxULilENlY.woff2') format('woff2');
+            font-display: swap;
+        }
 
         body {
             font-family: Arial, sans-serif;
@@ -21,11 +26,10 @@
         }
         h1 {
             margin-bottom: 10px;
-            font-family: 'Comic Neue','Comic Sans MS', serif !important;
+            font-family: 'Comic Neue', 'Comic Sans MS', serif !important;
             font-weight: 700;
             font-style: normal;
-            
-            
+            visibility: hidden; /* Скрыть заголовок до загрузки шрифта */
         }
         p {
             margin-bottom: 20px;
@@ -85,7 +89,7 @@
             background-color: #28a745;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             opacity: 1;
             transition: background-color 0.2s ease;
             height: 50px; /* Фиксированная высота кнопки */
@@ -308,6 +312,11 @@
             link.href = canvas.toDataURL('image/jpeg');
             link.click();
         });
+
+        // Check if the font is loaded and then display the header
+        document.fonts.ready.then(() => {
+            document.querySelector('h1').style.visibility = 'visible';
+        });
     </script>
 </body>
-</html><html lang="en">
+</html>
